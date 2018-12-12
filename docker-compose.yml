@@ -1,0 +1,79 @@
+version: '3'
+
+services:
+  web-sdk-to-kafka:
+    build:
+      context: ./
+      dockerfile: ./cmd/web-sdk-to-kafka/Dockerfile
+    environment:
+      BROKERS-OUT: kafka:9092
+      FREQUENCY: 500
+    hostname: web-sdk-to-kafka
+    ports:
+      - 80:80
+    depends_on:
+      - kafka
+
+  normalize:
+    build:
+      context: ./
+      dockerfile: ./cmd/normalize/Dockerfile
+    environment:
+      BROKERS-IN: kafka:9092
+      BROKERS-OUT: kafka:9092
+      GROUP: normalize
+      FREQUENCY: 500
+      READ-TOPIC: WebSDK-123-1
+      OFFSET: -1
+    hostname: normalize
+    depends_on:
+      - kafka
+
+  prep-to-ch:
+    build:
+      context: ./
+      dockerfile: ./cmd/prep-to-ch/Dockerfile
+    environment:
+      CH-DATASOURCE-NAME: tcp://clickhouse:9000?debug=true&read_timeout=10&write_timeout=20
+      BROKERS-IN: kafka:9092
+      BROKERS-OUT: kafka:9092
+      GROUP: prep-to-ch
+      FREQUENCY: 500
+      READ-TOPIC: WebSDKNormalize-1
+      WRITE-TOPIC-PREFIX: WebSDKPrepared-1
+      TOPIC-NUMS: 3
+      DATA-FLASH-BUFFER: 10000
+      OFFSET: -1
+    hostname: prep-to-ch
+    depends_on:
+      - kafka
+      - clickhouse
+
+  zookeeper:
+    image: zookeeper
+    hostname: zookeeper
+    ports:
+      - 2181:2181
+
+  kafka:
+    image: korservick/docker-kafka
+    hostname: kafka
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ADVERTISED_HOST_NAME: kafka
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+    ports:
+      - 9092:9092
+    depends_on:
+      - zookeeper
+
+  clickhouse:
+    image: yandex/clickhouse-server
+    hostname: clickhouse
+    ports:
+      - 8123:8123
+      - 9001:9000
+      - 9009:9009
+    depends_on:
+      - zookeeper
+      - kafka

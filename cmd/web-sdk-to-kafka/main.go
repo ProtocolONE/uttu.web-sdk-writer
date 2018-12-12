@@ -32,22 +32,22 @@ func loadEnvs() {
 	}
 }
 
-func loadKafkaTopics(broker *sarama.Broker) {
-	// TO DO: make check topics
-	req := sarama.MetadataRequest{}
-	//for {
-	resp, err := broker.GetMetadata(&req)
-	if err != nil {
-		log.Printf("%#v", &err)
-	}
-	t := resp.Topics
-	for _, val := range t {
-		//log.Printf("Key is %s", key)
-		log.Printf("topic: %s", val.Name)
-	}
-	time.Sleep(5 * time.Second)
-	//}
-}
+//func loadKafkaTopics(broker *sarama.Broker) {
+//	// TO DO: make check topics
+//	req := sarama.MetadataRequest{}
+//	//for {
+//	resp, err := broker.GetMetadata(&req)
+//	if err != nil {
+//		log.Printf("%#v", &err)
+//	}
+//	t := resp.Topics
+//	for _, val := range t {
+//		//log.Printf("Key is %s", key)
+//		log.Printf("topic: %s", val.Name)
+//	}
+//	time.Sleep(5 * time.Second)
+//	//}
+//}
 
 func collect(c echo.Context) error {
 	clientId := c.Param("clientId")
@@ -93,34 +93,34 @@ func main() {
 
 	loadEnvs()
 
-	brokersString := "localhost:9092"
-	broker := sarama.NewBroker(brokersString)
+	//brokersString := "localhost:9092"
+	//broker := sarama.NewBroker(brokersString)
 
 	configKafka := sarama.NewConfig()
 	configKafka.Version = sarama.V2_0_0_0
 	configKafka.Producer.RequiredAcks = sarama.WaitForLocal
 	configKafka.Producer.Compression = sarama.CompressionLZ4
-	configKafka.Producer.Flush.Frequency = time.Duration(150) * time.Millisecond
+	configKafka.Producer.Flush.Frequency = time.Duration(config.Frequency) * time.Millisecond
 
-	err = broker.Open(configKafka)
-	if err != nil {
-		log.Fatalln("Error:", err)
-	} else {
-		log.Printf("Open broker\n")
-	}
-	defer func() {
-		if err := broker.Close(); err != nil {
-			log.Println(err)
-		}
-	}()
-
-	connected, err := broker.Connected()
-	if err != nil {
-		log.Print(err.Error())
-	}
-	if connected {
-		log.Print("connected")
-	}
+	//err = broker.Open(configKafka)
+	//if err != nil {
+	//	log.Fatalln("Error:", err)
+	//} else {
+	//	log.Printf("Open broker\n")
+	//}
+	//defer func() {
+	//	if err := broker.Close(); err != nil {
+	//		log.Println(err)
+	//	}
+	//}()
+	//
+	//connected, err := broker.Connected()
+	//if err != nil {
+	//	log.Print(err.Error())
+	//}
+	//if connected {
+	//	log.Print("connected")
+	//}
 
 	producer, err = sarama.NewAsyncProducer(config.BrokersOut, configKafka)
 	if err != nil {
@@ -130,7 +130,7 @@ func main() {
 	}
 	defer producer.AsyncClose()
 
-	go loadKafkaTopics(broker)
+	//go loadKafkaTopics(broker)
 	e := echo.New()
 	e.POST("/collect/:clientId/:version", collect)
 	e.Logger.Fatal(e.Start(":80"))

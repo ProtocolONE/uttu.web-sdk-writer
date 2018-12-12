@@ -1,4 +1,4 @@
-module github.com/ProtocolONE/uttu.web-sdk-writer
+module uttu-web-sdk-writer
 
 require (
 	github.com/DataDog/zstd v1.3.4 // indirect
@@ -13,6 +13,7 @@ require (
 	github.com/eapache/queue v1.1.0 // indirect
 	github.com/golang/snappy v0.0.0-20180518054509-2e65f85255db // indirect
 	github.com/joho/godotenv v1.3.0
+	github.com/kshvakov/clickhouse v1.3.5
 	github.com/labstack/echo v3.3.5+incompatible
 	github.com/labstack/gommon v0.2.8 // indirect
 	github.com/mattn/go-colorable v0.0.9 // indirect

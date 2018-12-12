@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"github.com/ProtocolONE/uttu.web-sdk-writer/pkg/types"
 	"github.com/Shopify/sarama"
 	"github.com/bsm/sarama-cluster"
 	"github.com/caarlos0/env"
@@ -10,6 +9,7 @@ import (
 	"log"
 	"strconv"
 	"time"
+	"uttu-web-sdk-writer/pkg/types"
 )
 
 var (
@@ -42,22 +42,22 @@ func loadEnvs() {
 	}
 }
 
-func loadKafkaTopics(broker *sarama.Broker) {
-	// TO DO: make check topics
-	req := sarama.MetadataRequest{}
-	//for {
-	resp, err := broker.GetMetadata(&req)
-	if err != nil {
-		log.Printf("%#v", &err)
-	}
-	t := resp.Topics
-	for _, val := range t {
-		//log.Printf("Key is %s", key)
-		log.Printf("topic: %s", val.Name)
-	}
-	time.Sleep(5 * time.Second)
-	//}
-}
+//func loadKafkaTopics(broker *sarama.Broker) {
+//	// TO DO: make check topics
+//	req := sarama.MetadataRequest{}
+//	//for {
+//	resp, err := broker.GetMetadata(&req)
+//	if err != nil {
+//		log.Printf("%#v", &err)
+//	}
+//	t := resp.Topics
+//	for _, val := range t {
+//		//log.Printf("Key is %s", key)
+//		log.Printf("topic: %s", val.Name)
+//	}
+//	time.Sleep(5 * time.Second)
+//	//}
+//}
 
 func partitionConsumer(pc cluster.PartitionConsumer) {
 	for msg := range pc.Messages() {
@@ -161,6 +161,8 @@ func sendToKafka(msg []byte, versionOut string, postfix string) {
 func main() {
 
 	log.SetFlags(log.LstdFlags | log.Lmicroseconds)
+	//sarama.Logger = log.New(os.Stdout, "[sarama] ", log.LstdFlags)
+
 	// go func() {
 	//      log.Println(http.ListenAndServe("0.0.0.0:8888", nil))
 	// }()
@@ -168,12 +170,12 @@ func main() {
 	loadEnvs()
 	log.Println(config)
 
-	brokersString := "localhost:9092"
+	//brokersString := "localhost:9092"
 	clientID = "123"
-	broker := sarama.NewBroker(brokersString)
+	//broker := sarama.NewBroker(brokersString)
 
-	configBroker := sarama.NewConfig()
-	configBroker.Version = sarama.V2_0_0_0
+	//configBroker := sarama.NewConfig()
+	//configBroker.Version = sarama.V2_0_0_0
 
 	configProducer := sarama.NewConfig()
 	configProducer.Version = sarama.V2_0_0_0
@@ -214,27 +216,27 @@ func main() {
 		}
 	}()
 
-	err = broker.Open(configBroker)
-	if err != nil {
-		log.Fatalln("Error:", err)
-	} else {
-		log.Printf("Open broker\n")
-	}
-	defer func() {
-		if err := broker.Close(); err != nil {
-			log.Println(err)
-		}
-	}()
-
-	connected, err := broker.Connected()
-	if err != nil {
-		log.Print(err.Error())
-	}
-	if connected {
-		log.Print("connected")
-	}
-
-	loadKafkaTopics(broker)
+	//err = broker.Open(configBroker)
+	//if err != nil {
+	//	log.Fatalln("Error:", err)
+	//} else {
+	//	log.Printf("Open broker\n")
+	//}
+	//defer func() {
+	//	if err := broker.Close(); err != nil {
+	//		log.Println(err)
+	//	}
+	//}()
+	//
+	//connected, err := broker.Connected()
+	//if err != nil {
+	//	log.Print(err.Error())
+	//}
+	//if connected {
+	//	log.Print("connected")
+	//}
+	//
+	//loadKafkaTopics(broker)
 
 	producer, err = sarama.NewAsyncProducer(config.BrokersOut, configProducer)
 	if err != nil {

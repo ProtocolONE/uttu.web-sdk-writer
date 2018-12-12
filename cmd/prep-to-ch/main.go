@@ -2,18 +2,19 @@ package main
 
 import (
 	"bytes"
+	"database/sql"
 	"fmt"
-	"log"
-
-	"time"
-
 	"github.com/Shopify/sarama"
 	"github.com/bsm/sarama-cluster"
 	"github.com/caarlos0/env"
 	"github.com/dgryski/go-jump"
 	"github.com/joho/godotenv"
+	"github.com/kshvakov/clickhouse"
 	"github.com/pierrec/xxHash/xxHash64"
 	"github.com/valyala/fastjson"
+	"log"
+	"time"
+	"uttu-web-sdk-writer/pkg/constants"
 )
 
 type buffer struct {
@@ -21,8 +22,13 @@ type buffer struct {
 	Data  []byte
 }
 
+type DataBase struct {
+	connect *sql.DB
+}
+
 var (
 	config struct {
+		CHDataSourceName string   `env:"CH-DATASOURCE-NAME" envDefault:"tcp://localhost:9001?debug=true&read_timeout=10&write_timeout=20"`
 		BrokersIn        []string `env:"BROKERS-IN" envDefault:"localhost:9092" envSeparator:","`
 		BrokersOut       []string `env:"BROKERS-OUT" envDefault:"localhost:9092" envSeparator:","`
 		Group            string   `env:"GROUP" envDefault:"PrepToCH"`
@@ -50,6 +56,36 @@ func loadEnvs() {
 	if err := env.Parse(&config); err != nil {
 		log.Fatal("Failed to parse ENV")
 	}
+}
+
+func (db *DataBase) InitCH(dsn string) error {
+	var err error
+
+	db.connect, err = sql.Open("clickhouse", dsn)
+	if err != nil {
+		return err
+	}
+
+	if err := db.connect.Ping(); err != nil {
+		if exception, ok := err.(*clickhouse.Exception); ok {
+			log.Fatalf("[%d] %s \n%s\n", exception.Code, exception.Message, exception.StackTrace)
+		} else {
+			fmt.Println(err)
+		}
+		return err
+	}
+
+	if _, err := db.connect.Exec(constants.WebSDK); err != nil {
+		return err
+	}
+	if _, err := db.connect.Exec(constants.WebSDKKafka); err != nil {
+		return err
+	}
+	if _, err := db.connect.Exec(constants.WebSDKKafkaMV); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func partitionConsumer(pc cluster.PartitionConsumer) {
@@ -116,9 +152,17 @@ func main() {
 	// go func() {
 	//      log.Println(http.ListenAndServe("0.0.0.0:8888", nil))
 	// }()
-
 	loadEnvs()
 	log.Println(config)
+
+	log.Println("Init DB...")
+	db := DataBase{}
+	if err = db.InitCH(config.CHDataSourceName); err != nil {
+		log.Fatalln("Error:", err)
+	}
+	if err = db.connect.Close(); err != nil {
+		log.Fatalln("Error:", err)
+	}
 
 	log.Println("Started...")
 
