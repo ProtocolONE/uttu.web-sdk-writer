@@ -1,0 +1,30 @@
+env:
+  global:
+  - REPO1=p1hub/uttu.wsw.normalize
+  - REPO2=p1hub/uttu.wsw.prepare
+  - REPO3=p1hub/uttu.wsw.webtokafka
+  - secure: cJqeovJqebSS7n3BIL3in6YMtawOqcqyT7/HPOO/cKej4zadht7w1Cr98bf5lYRSgrSD8OeyNAd7GYxXJoVGZqAzMhZoMKOl+bEnUtK5Rj4PXo2U9XYhd8QUYvbJQvW5VWva4KYRADMmafJ5nyCLwNhbvZlTBtYuUoRyR8tmp07TxBrpGY8dQJyfGbRnKZuwRbNhTurkwmHcmGt2Ppe7h2f/y+M8/o79SStI0pLyHy5ZkbBpoPrmwTS1/prKaxifOiySbyjNmXKRBhiVD2nAw94w7y3qi+E5FFy0HuCyXq3TbzrVc4cKzfHhX+fg7qSfi7UeYqmjQZba0MGrVIq6Uey+QLBt/7ZFAfJj61ml6RINX+iHbx8/pWSsK0GE0WIC98O7XLCPUOFWwOGzI3forN6lPER+DJ1MIPHsQ+ILaXlPMTVbQm3i3/9vv9qi9U/97fzJuZckuoGbM1Vp0kRoIibUSa+GS+CA2ipBqjPy+lKzZ2oc9Lv+qOvKIgNCt3/7RLL66nUJ1sfFxQxxhSxgf/4We1XanK3TxPV/Iwo+aZeQwnrRTIzrA1t00ZZajWzW+GAWmHcaCK03zyPWBFXYf0UxQF7+dVrwCGjUYpUAVNLiIbCO/BT1vXnZREpJW+MfNsqphnoG5MI5/NmkK0gbMSAeyZgasDPLFmoeJoB7Tso=
+  - secure: W8USCEbs3w1mlO0/txJFacb0sTXJ7jR+1QaAB01WqVloW97P1vnuYTzKnlGfzhkvNkYXj3JhWkBNHuab2T7onEe0zCsVMtYqqls3p28NgOnij0iQHO/aQFxA0WivEQbfFFQKX9R4YcoZVOK+evARD7y8bjI8lWORWLVHEG9R0IA2iFL1WEuRKmNN0n1C4/kKVdOxeNI4WXVR+JBlHb3Sqw2XpVuzEcXxL2vOz1x4SKI9p5bAkZhazUfgofuEuM1bkJsgGoJATl21TzaRHeV4/Kk+iaJe4ANb70j5DV3CXBqVUq1HpHZgozyAr8bV5piAlwocXaJeEsfjp/qGT01q70O7+ZcvStnSsh2HAcOKXsFbWPOUP90gv3yXG5yWLnx6ZVSMVnAl0fSQxVtoiNI2itMgS5evGlEp0Gx3LFUBduOtERToS6kYZc+/oAhrDIZp9Vg1zlWNLWtlturVNGUyRRCuxheacNBee7lOYBoYRTQXHmAsv+0769fVb6tDZxOgJx6QhW5s0q8JnelR9HV0IQLaAYolqhPZ0KCYFR26UbsYzum1GABnTQJnWwDB4DttHppU3QSie+dtVen0zms4vUIG3ISULAbpBQHwJYEwI2hk5ScwGOaHGR+310Y7ihrMnSm7lJGzjcX63ZjcXa9WR7wIVMzTLRHLNeglVGEI8S0=
+sudo: true
+services:
+- docker
+jobs:
+  include:
+  - stage: Building images for uttu.web-sdk-writer
+    script:
+    - export TAG=`if [[ $TRAVIS_BRANCH == "master" ]]; then echo "latest"; else echo
+      $TRAVIS_TAG; fi`
+    - echo "$DOCKER_PASSWORD" | docker login --username "$DOCKER_USERNAME" --password-stdin
+    - docker build -t "$REPO1:$TAG" -t "$REPO1:0.0.$TRAVIS_BUILD_NUMBER" -f cmd/normalize/Dockerfile
+      .
+    - docker push $REPO1
+    - docker build -t "$REPO2:$TAG" -t "$REPO2:0.0.$TRAVIS_BUILD_NUMBER" -f cmd/prep-to-ch/Dockerfile
+      .
+    - docker push $REPO2
+    - docker build -t "$REPO3:$TAG" -t "$REPO3:0.0.$TRAVIS_BUILD_NUMBER" -f cmd/web-sdk-to-kafka/Dockerfile
+      .
+    - docker push $REPO3
+notifications:
+  email: false
+  slack:
+    secure: Ytau7v2T5AOe9o/kZxcIUxrBaBoaHopi9IyCwmOAizsg2PFVifGC8UaQey+xNHIk5PIeBnmLvu8Tc36kWSfcRMfxbOxunxZlQfjYMX94x824ZI2ATxoH2rK/2sMCWCMi1/BNvWZGzfxBrpGp6fqLnCPStKfvaLJPfC3hMXJxzhhStgIZcGXaL69XAN1zWvEQxRa4bm9dg6Q6s14qAx5O+TrQPWpJASfAXlYxHxDoB+9kMnwFPNz0/ckDPqSjOfxe96+y0mlGDE2AJniKyrZcH5X2jRZ5Usmho+OsDlgB1yT5MwidGkB4WBAI86V1FE6yBpPOYSp/fo61c4kEjr1tHMoQ7rEV/MsXyc+MfrxntmShTVvhd185shbcDmrpO7qpjqQTOsynShCZBZCzqkSM6/xAJZrLCUibtg+XFEUlbo2Jw7jleYTfI3Jj4qGULPkec6zyrinmwujFKo+ZsozcFKcdp267etu1MWExuzpeCMDJ43PMxgGObH5pZN4BP2Q+qWFgzq4YyXND60OtIwysKOIug4DcBZh7w3I12cIElprRPKYzaWZgYFGzkc8HTlrKHyI/r7fz3zUpxyDkInSanfvBA9onmozBHo57sVUroLLYq7P/S9BozHieNNd/ZXvZ2kXbX3spOMzjxK29RNj9t7nOBVM0a9FVc7Tu3NaZhFw=
