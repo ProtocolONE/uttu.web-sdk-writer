@@ -15,13 +15,13 @@ jobs:
     - export TAG=`if [[ $TRAVIS_BRANCH == "master" ]]; then echo "latest"; else echo
       $TRAVIS_TAG; fi`
     - echo "$DOCKER_PASSWORD" | docker login --username "$DOCKER_USERNAME" --password-stdin
-    - docker build -t $REPO1:$TAG -t $REPO1:0.0.$TRAVIS_BUILD_NUMBER -f cmd/normalize/Dockerfile
+    - docker build -t "$REPO1:$TAG" -t "$REPO1:0.0.$TRAVIS_BUILD_NUMBER" -f cmd/normalize/Dockerfile
       .
     - docker push $REPO1
-    - docker build -t $REPO2:$TAG -t $REPO2:0.0.$TRAVIS_BUILD_NUMBER -f cmd/prep-to-ch/Dockerfile
+    - docker build -t "$REPO2:$TAG" -t "$REPO2:0.0.$TRAVIS_BUILD_NUMBER" -f cmd/prep-to-ch/Dockerfile
       .
     - docker push $REPO2
-    - docker build -t $REPO3:$TAG -t $REPO3:0.0.$TRAVIS_BUILD_NUMBER -f cmd/web-sdk-to-kafka/Dockerfile
+    - docker build -t "$REPO3:$TAG" -t "$REPO3:0.0.$TRAVIS_BUILD_NUMBER" -f cmd/web-sdk-to-kafka/Dockerfile
       .
     - docker push $REPO3
 notifications:
