@@ -2,7 +2,7 @@ env:
   global:
   - REPO1=p1hub/uttu.wsw.normalize
   - REPO2=p1hub/uttu.wsw.prepare
-  - REPO3=p1hub/uttu.wsw.kafka
+  - REPO3=p1hub/uttu.wsw.webtokafka
   - secure: cJqeovJqebSS7n3BIL3in6YMtawOqcqyT7/HPOO/cKej4zadht7w1Cr98bf5lYRSgrSD8OeyNAd7GYxXJoVGZqAzMhZoMKOl+bEnUtK5Rj4PXo2U9XYhd8QUYvbJQvW5VWva4KYRADMmafJ5nyCLwNhbvZlTBtYuUoRyR8tmp07TxBrpGY8dQJyfGbRnKZuwRbNhTurkwmHcmGt2Ppe7h2f/y+M8/o79SStI0pLyHy5ZkbBpoPrmwTS1/prKaxifOiySbyjNmXKRBhiVD2nAw94w7y3qi+E5FFy0HuCyXq3TbzrVc4cKzfHhX+fg7qSfi7UeYqmjQZba0MGrVIq6Uey+QLBt/7ZFAfJj61ml6RINX+iHbx8/pWSsK0GE0WIC98O7XLCPUOFWwOGzI3forN6lPER+DJ1MIPHsQ+ILaXlPMTVbQm3i3/9vv9qi9U/97fzJuZckuoGbM1Vp0kRoIibUSa+GS+CA2ipBqjPy+lKzZ2oc9Lv+qOvKIgNCt3/7RLL66nUJ1sfFxQxxhSxgf/4We1XanK3TxPV/Iwo+aZeQwnrRTIzrA1t00ZZajWzW+GAWmHcaCK03zyPWBFXYf0UxQF7+dVrwCGjUYpUAVNLiIbCO/BT1vXnZREpJW+MfNsqphnoG5MI5/NmkK0gbMSAeyZgasDPLFmoeJoB7Tso=
   - secure: P9oH8GSUnhRBzMQ0WfiRWkZ0nINeKiEc+D4N3riccsa/kWBKBwt0/BQobVOinPkWnaYLNH5Jv5Vdp2S/v0I6I1PQL2PAKfabr21Kb9H1N5trZZQrfW8+xnDrxbWibx8m2/GGcqY7qpVPjZlaNsBapi3mzSvBsF9lmSVSIx2CvtOBKa3D1nzuClHAejLFH1HTbVkxA0wRwhH7z44mNs4qSh2mDjrBk2i9IWsjjareQi6b9EsZCHwMLg6rxOWIjmpZnTqXEnos1ZGEzqeZC6AM/3WNzxpALHfDBkFMVP7U+HHLJFdHc9OyrqgeXAj/rqod5bFZ8BtmSmIFa4Mm5lRz8R/hBj/ctsqwe9y0teUgy8edJc6jKkGP8OOG9zLsLhHZ8tOUOm90yJ2mnVsmtf8hMmyh+hFPba+HrfoHSYAGBTlIRQZjuYvntxI+56juKb/yCaVGEfgotXqILfRaxsrN7wlFfF8DhPJiAdk8D9Oh+Vh2NCd1aebtSCrj7Z3+XyKdQahGB3ts0KxjdDDVixSNcZmVbfjgf2UlrPislnYcbcxSm7qNINxA3PjcMx8CS0EnQCsnTKFA10Rx+vEQrjKnBb053qTS2tDdhl6TyT9fQ6EAK9MFMq2l50tWpoDyHDjYmFku35S8WKImfHY+wXwacru0nMCL6CAcsIW0GOe9JGA=
 sudo: true
@@ -15,11 +15,11 @@ jobs:
     - export TAG=`if [[ $TRAVIS_BRANCH == "master" ]]; then echo "latest"; else echo
       $TRAVIS_TAG; fi`
     - echo "$DOCKER_PASSWORD" | docker login --username "$DOCKER_USERNAME" --password-stdin
-    - cd docker build -t $REPO1:$TAG -t $REPO1:0.0.$TRAVIS_BUILD_NUMBER -f cmd/normalize/Dockerfile .
+    - docker build -t $REPO1:$TAG -t $REPO1:0.0.$TRAVIS_BUILD_NUMBER -f cmd/normalize/Dockerfile .
     - docker push $REPO1
-    - docker build -t $REPO2:$TAG -t $REPO2:0.0.$TRAVIS_BUILD_NUMBER -f cmd/normalize/Dockerfile .
+    - docker build -t $REPO2:$TAG -t $REPO2:0.0.$TRAVIS_BUILD_NUMBER -f cmd/prep-to-ch/Dockerfile .
     - docker push $REPO2
-    - docker build -t $REPO3:$TAG -t $REPO3:0.0.$TRAVIS_BUILD_NUMBER -f cmd/normalize/Dockerfile .
+    - docker build -t $REPO3:$TAG -t $REPO3:0.0.$TRAVIS_BUILD_NUMBER -f cmd/web-sdk-to-kafka/Dockerfile .
     - docker push $REPO3
 notifications:
   email: false
