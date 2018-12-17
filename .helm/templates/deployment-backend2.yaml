@@ -42,9 +42,9 @@ spec:
         - containerPort: {{ $deployment.port }}
         env:
           - name: BROKERS-OUT
-            value: {{ $env.broker.out }}
+            value: {{ .Values.broker.out }}
           - name: BROKERS-IN
-            value: {{ $env.broker.in }}
+            value: {{ .Values.broker.in }}
           - name: CH-DATASOURCE-NAME
             valueFrom:
               secretKeyRef:
