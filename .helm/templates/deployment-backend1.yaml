@@ -38,8 +38,6 @@ spec:
       containers:
       - name: {{ $deployment.name }}
         image: {{ $deployment.image }}:{{ $deployment.imageTag }}
-        ports:
-        - containerPort: {{ $deployment.port }}
         env:
           - name: BROKERS-OUT
             value: {{ .Values.broker.out }}
