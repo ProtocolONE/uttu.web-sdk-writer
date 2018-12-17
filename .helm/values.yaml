@@ -11,8 +11,8 @@ certIssuer:
   email: admin@protocol.one
 
 broker:
-  out: kafka:9092
-  in: kafka:9092
+  out: kafka.default:9092
+  in: kafka.default:9092
 
 frontend:
   name: uttuwsw
